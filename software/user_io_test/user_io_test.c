@@ -24,29 +24,17 @@ int8_t* read_token(int8_t* b, uint32_t n, int8_t* ds)
 }
 
 void decode_and_print_button(uint32_t button_state) {
-    if ((button_state & 0x1) && (button_state & 0x2)) {
-        uwrite_int8s("\tRotary Wheel Left Spin Detected\r\n");
+    if (button_state & 0x1) {
+        uwrite_int8s("\tButton 0 Push Detected\r\n");
     }
-    if (!(button_state & 0x1) && (button_state & 0x2)) {
-        uwrite_int8s("\tRotary Wheel Right Spin Detected\r\n");
+    if (button_state & 0x2) {
+        uwrite_int8s("\tButton 1 Push Detected\r\n");
     }
     if (button_state & 0x4) {
-        uwrite_int8s("\tRotary Push Detected\r\n");
+        uwrite_int8s("\tButton 2 Push Detected\r\n");
     }
     if (button_state & 0x8) {
-        uwrite_int8s("\tWest Button Push Detected\r\n");
-    }
-    if (button_state & 0x10) {
-        uwrite_int8s("\tSouth Button Push Detected\r\n");
-    }
-    if (button_state & 0x20) {
-        uwrite_int8s("\tEast Button Push Detected\r\n");
-    }
-    if (button_state & 0x40) {
-        uwrite_int8s("\tNorth Button Push Detected\r\n");
-    }
-    if (button_state & 0x80) {
-        uwrite_int8s("\tCenter Button Push Detected\r\n");
+        uwrite_int8s("\tButton 3 Push Detected\r\n");
     }
 }
 
