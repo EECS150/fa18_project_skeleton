@@ -33,9 +33,6 @@ void decode_and_print_button(uint32_t button_state) {
     if (button_state & 0x4) {
         uwrite_int8s("\tButton 2 Push Detected\r\n");
     }
-    if (button_state & 0x8) {
-        uwrite_int8s("\tButton 3 Push Detected\r\n");
-    }
 }
 
 int main(void) {
