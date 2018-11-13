@@ -1,8 +1,8 @@
 `timescale 1ns/1ps
 
 module echo_integration_testbench ();
-    parameter SYSTEM_CLK_PERIOD = 10;
-    parameter SYSTEM_CLK_FREQ = 100_000_000;
+    parameter SYSTEM_CLK_PERIOD = 8;
+    parameter SYSTEM_CLK_FREQ = 125_000_000;
 
     reg sys_clk = 0;
     reg sys_rst = 0;
@@ -19,23 +19,16 @@ module echo_integration_testbench ();
     wire        data_out_valid;
     reg         data_out_ready;
 
-    ml505top # (
+    z1top #(
         .SYSTEM_CLOCK_FREQ(SYSTEM_CLK_FREQ),
         .B_SAMPLE_COUNT_MAX(1),
-        .B_PULSE_COUNT_MAX(1),
-        .R_SAMPLE_COUNT_MAX(1),
-        .R_PULSE_COUNT_MAX(1)
+        .B_PULSE_COUNT_MAX(1)
     ) top (
         .USER_CLK(sys_clk),
-
-        .GPIO_DIP(8'd0),
-        .FPGA_ROTARY_INCA(1'b0),
-        .FPGA_ROTARY_INCB(1'b0),
-        .FPGA_ROTARY_PUSH(1'b0),
-        .GPIO_BUTTONS(5'd0),
-        .FPGA_CPU_RESET_B(~sys_rst),
-
-        // UART connections
+        .RESET(sys_rst),
+        .BUTTONS(3'b0),
+        .SWITCHES(2'b0),
+        .LEDS(),
         .FPGA_SERIAL_RX(FPGA_SERIAL_RX),
         .FPGA_SERIAL_TX(FPGA_SERIAL_TX)
     );

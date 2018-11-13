@@ -48,31 +48,36 @@ void print_tone_under_edit() {
 
 void take_button_action (uint32_t button_state) {
     int8_t buffer[BUFFER_LEN];
-    if ((button_state & 0x1) && (button_state & 0x2)) { // Rotary wheel left spin
-        if (current_state == REGULAR_PLAY || current_state == REVERSE_PLAY || current_state == PAUSED) {
-            music_tempo += 30000;
-            print_music_tempo();
-        } else if (current_state == PLAY_SEQ) {
-            sequencer_tempo += 30000;
-            print_sequencer_tempo();
-        } else { // EDIT_SEQ
-            tone_under_edit += 1000;
-            print_tone_under_edit();
+    if (button_state & 0x1) { // BTN0 -- play/pause
+        if (current_state == REGULAR_PLAY || current_state == REVERSE_PLAY || current_state == PLAY_SEQ) {
+            current_state = PAUSED;
+            uwrite_int8s("Moving to PAUSED state\r\n");
+        }
+        else if (current_state == PAUSED) {
+            current_state = REGULAR_PLAY;
+            uwrite_int8s("Moving to REGULAR_PLAY state\r\n");
         }
     }
-    if (!(button_state & 0x1) && (button_state & 0x2)) { // Rotary wheel right spin
-        if (current_state == REGULAR_PLAY || current_state == REVERSE_PLAY || current_state == PAUSED) {
-            music_tempo -= 30000;
-            print_music_tempo();
-        } else if (current_state == PLAY_SEQ) {
-            sequencer_tempo -= 30000;
-            print_sequencer_tempo();
-        } else { // EDIT_SEQ
-            tone_under_edit -= 1000;
-            print_tone_under_edit();
+    if (button_state & 0x2) { // BTN1 -- reverse play
+        if (current_state == REGULAR_PLAY) {
+            current_state = REVERSE_PLAY;
+            uwrite_int8s("Moving to REVERSE_PLAY state\r\n");
+        }
+        else if (current_state == REVERSE_PLAY) {
+            current_state = REGULAR_PLAY;
+            uwrite_int8s("Moving to REGULAR_PLAY state\r\n");
+        }
+        else if (current_state == PLAY_SEQ) {
+            current_state = EDIT_SEQ;
+            tone_under_edit = sequencer_mem[sequencer_index];
+            uwrite_int8s("Moving to EDIT_SEQ state\r\n");
+        }
+        else if (current_state == EDIT_SEQ) {
+            current_state = PLAY_SEQ;
+            uwrite_int8s("Moving to PLAY_SEQ state\r\n");
         }
     }
-    if (button_state & 0x4) { // Rotary wheel push
+    if (button_state & 0x4) { // BTN2 -- tempo reset
         if (current_state == EDIT_SEQ) {
             sequencer_mem[sequencer_index] = tone_under_edit;
             uwrite_int8s("Wrote note: ");
@@ -92,63 +97,69 @@ void take_button_action (uint32_t button_state) {
             print_music_tempo();
         }
     }
-    if (button_state & 0x8) { // West button push
-        if (current_state == EDIT_SEQ) {
-            sequencer_index = sequencer_index == 0 ? 7 : sequencer_index - 1;
-            tone_under_edit = sequencer_mem[sequencer_index];
-            uwrite_int8s("Editing note: ");
-            uwrite_int8s(uint32_to_ascii_hex(sequencer_index, buffer, BUFFER_LEN));
-            uwrite_int8s("\r\n");
-        }
-    }
-    if (button_state & 0x10) { // South button push
-        if (current_state == REGULAR_PLAY) {
-            current_state = REVERSE_PLAY;
-            uwrite_int8s("Moving to REVERSE_PLAY state\r\n");
-        }
-        else if (current_state == REVERSE_PLAY) {
-            current_state = REGULAR_PLAY;
-            uwrite_int8s("Moving to REGULAR_PLAY state\r\n");
-        }
-        else if (current_state == PLAY_SEQ) {
-            current_state = EDIT_SEQ;
-            tone_under_edit = sequencer_mem[sequencer_index];
-            uwrite_int8s("Moving to EDIT_SEQ state\r\n");
-        }
-        else if (current_state == EDIT_SEQ) {
-            current_state = PLAY_SEQ;
-            uwrite_int8s("Moving to PLAY_SEQ state\r\n");
-        }
-    }
-    if (button_state & 0x20) { // East button push
-        if (current_state == EDIT_SEQ) {
-            sequencer_index = sequencer_index == 7 ? 0 : sequencer_index + 1;
-            tone_under_edit = sequencer_mem[sequencer_index];
-            uwrite_int8s("Editing note: ");
-            uwrite_int8s(uint32_to_ascii_hex(sequencer_index, buffer, BUFFER_LEN));
-            uwrite_int8s("\r\n");
-        }
-    }
-    if (button_state & 0x40) { // North button push
-        if (current_state == REGULAR_PLAY || current_state == PAUSED) {
-            current_state = PLAY_SEQ;
-            uwrite_int8s("Moving to PLAY_SEQ state\r\n");
-        }
-        else if (current_state == PLAY_SEQ) {
-            current_state = REGULAR_PLAY;
-            uwrite_int8s("Moving to REGULAR_PLAY state\r\n");
-        }
-    }
-    if (button_state & 0x80) { // Center button push
-        if (current_state == REGULAR_PLAY || current_state == REVERSE_PLAY || current_state == PLAY_SEQ) {
-            current_state = PAUSED;
-            uwrite_int8s("Moving to PAUSED state\r\n");
-        }
-        else if (current_state == PAUSED) {
-            current_state = REGULAR_PLAY;
-            uwrite_int8s("Moving to REGULAR_PLAY state\r\n");
-        }
-    }
+    /********************************************************** 
+    Comment out the following two if() statements if you want to add tempo adjustment. 
+    Note that you probably have to use switches to get this part working due to a lack of buttons.
+    /**********************************************************/
+
+    // if (button_state & 0x2) { // 
+    //     if (current_state == REGULAR_PLAY || current_state == REVERSE_PLAY || current_state == PAUSED) {
+    //         music_tempo += 30000;
+    //         print_music_tempo();
+    //     } else if (current_state == PLAY_SEQ) {
+    //         sequencer_tempo += 30000;
+    //         print_sequencer_tempo();
+    //     } else { // EDIT_SEQ
+    //         tone_under_edit += 1000;
+    //         print_tone_under_edit();
+    //     }
+    // }
+    // if (button_state & 0x4) { // 
+    //     if (current_state == REGULAR_PLAY || current_state == REVERSE_PLAY || current_state == PAUSED) {
+    //         music_tempo -= 30000;
+    //         print_music_tempo();
+    //     } else if (current_state == PLAY_SEQ) {
+    //         sequencer_tempo -= 30000;
+    //         print_sequencer_tempo();
+    //     } else { // EDIT_SEQ
+    //         tone_under_edit -= 1000;
+    //         print_tone_under_edit();
+    //     }
+    // }
+
+    /********************************************************** 
+    Comment out the following two if() statements if you want to add sequencer functionality. 
+    Note that you will have to figure out which buttons/switches control and change the code,
+    as this was written for a different FPGA.
+    /**********************************************************/
+    // if (button_state & 0x8) { // West button push
+    //     if (current_state == EDIT_SEQ) {
+    //         sequencer_index = sequencer_index == 0 ? 7 : sequencer_index - 1;
+    //         tone_under_edit = sequencer_mem[sequencer_index];
+    //         uwrite_int8s("Editing note: ");
+    //         uwrite_int8s(uint32_to_ascii_hex(sequencer_index, buffer, BUFFER_LEN));
+    //         uwrite_int8s("\r\n");
+    //     }
+    // }
+    // if (button_state & 0x20) { // East button push
+    //     if (current_state == EDIT_SEQ) {
+    //         sequencer_index = sequencer_index == 7 ? 0 : sequencer_index + 1;
+    //         tone_under_edit = sequencer_mem[sequencer_index];
+    //         uwrite_int8s("Editing note: ");
+    //         uwrite_int8s(uint32_to_ascii_hex(sequencer_index, buffer, BUFFER_LEN));
+    //         uwrite_int8s("\r\n");
+    //     }
+    // }
+    // if (button_state & 0x40) { // North button push
+    //     if (current_state == REGULAR_PLAY || current_state == PAUSED) {
+    //         current_state = PLAY_SEQ;
+    //         uwrite_int8s("Moving to PLAY_SEQ state\r\n");
+    //     }
+    //     else if (current_state == PLAY_SEQ) {
+    //         current_state = REGULAR_PLAY;
+    //         uwrite_int8s("Moving to REGULAR_PLAY state\r\n");
+    //     }
+    // }
 }
 
 int main(void) {
